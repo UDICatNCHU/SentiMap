@@ -1,0 +1,5 @@
+from django.http import HttpResponse
+from django.shortcuts import render_to_response, render
+
+def map(request):
+		return render_to_response('SentiMap/taiwan.html',locals())
