@@ -40,7 +40,7 @@ Deploy SentiMap is the same as normal Django project.
 
 ### Result
 
-![Demo](/SentiMap/static/SentiMap/img/readme/Selection_018.png)
+![Demo](/static/SentiMap/img/readme/Selection_018.png)
 
 ## Built With
 
