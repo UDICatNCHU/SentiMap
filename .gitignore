@@ -1,2 +1,8 @@
 *.pyc
 venv
+##### ignore Thumbs.db ###
+
+/static/SentiMap/img/Thumbs.db
+/static/SentiMap/img/readme/Thumbs.db
+
+###########################
