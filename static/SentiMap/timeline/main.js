@@ -279,7 +279,8 @@ jQuery(document).ready(function($){
 	function ajaxCurrentDate()
 	{
 		var current_date = $('.selected').attr("data-date");
-		console.log(current_date);
+		var split_month = current_date.split('/')
+		console.log(split_month[1]);
 		// $.ajax({                                      
 		// 	url: '',                            
 		// 	data: {issue:,current_date:current_date},                       

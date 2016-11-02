@@ -7,9 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <link rel="stylesheet" href="{% static 'SentiMap/css/map.css' %}" />
 
-<link rel="stylesheet" href="/static/Sentimap/timeline/reset.css"> <!-- CSS reset -->
-<link rel="stylesheet" href="/static/Sentimap/timeline/style.css"> <!-- Resource style -->
-<script src="/static/Sentimap/timeline/modernizr.js"></script> <!-- Modernizr -->
+<link rel="stylesheet" href="{% static 'Sentimap/timeline/reset.css' %}"> <!-- CSS reset -->
+<link rel="stylesheet" href="{% static 'Sentimap/timeline/style.css' %}"> <!-- Resource style -->
+<script src="{% static 'Sentimap/timeline/modernizr.js' %}"></script> <!-- Modernizr -->
 <style type="text/css">
   #map {    height: 500px; width: 1000px; 
                 margin-left: auto; margin-right: auto;
@@ -35,8 +35,8 @@
       <div class="ui big label">
           添加議題:
           <div class="ui icon input">
-            <input id="add_issue" type="text" placeholder="Search...">
-            <input type="hidden" name="submit" value="00/00/0000">
+            <input id="issue" type="text" name="issue" placeholder="Search...">
+            <input type="hidden" name="month" value="00">
             <i id="submit_form" class="inverted circular search link icon"></i>
           </div>
         </div>
@@ -102,25 +102,78 @@
 {% endwith %}
 " type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
-<script src="/static/Sentimap/timeline/jquery.mobile.custom.min.js"></script>
-<script src="/static/Sentimap/timeline/main.js"></script> <!-- Resource jQuery -->
+<script src="{% static 'Sentimap/timeline/jquery.mobile.custom.min.js' %}"></script>
+<script src="{% static 'Sentimap/timeline/main.js' %}"></script> <!-- Resource jQuery -->
 <script>
       var target=[];
+      var translation={
+        "台中市" : "",
+        "雲林縣" : "",
+        "彰化縣" : "",
+        "新竹縣" : "",
+        "苗栗縣" : "",
+        "南投縣" : "",
+        "嘉義縣" : "",
+        "屏東縣" : "",
+        "宜蘭縣" : "",
+        "花蓮縣" : "",
+        "台東縣" : "",
+        "金門縣" : "",
+        "澎湖縣" : "",
+        "新北市" : "",
+        "台北市" : "",
+        "新北市" : "",
+        "桃園縣" : "",
+        "台南市" : "",
+        "高雄市" : "",
+        "基隆市" : "",
+        "新竹市" : "",
+        "嘉義市" : ""
+      }
       target[0]={
-          "issue": "大巨蛋",
-          "map": [
-             {
-               "attendee": 100, // 參與評論人數
-               "location": "台中市",
-               "score": 50//  評論人數  分數
+       "map": {
+         "Taiwan": {
+           "Taiwan": {
+             "Fenjihu": {
+               "score": 0,
+               "attendee": 3
              },
-             {
-               "attendee": 100, // 參與評論人數
-               "location": "台北市",
-               "score": 500//  評論人數  分數
+             "Fen-chi-hu": {
+               "score": 0,
+               "attendee": 1
              }
-           ]
-        };
+           },
+           "台中市": {
+             "Zhongkeng Village": {
+               "score": 100.0,
+               "attendee": 1
+             },
+             "Zhongkeng": {
+               "score": 10.0,
+               "attendee": 1
+             }
+           }
+         }
+       },
+       "issue": "光復節"
+      }
+
+      // switch EN key to CH key
+      // var parsed = JSON.parse(myJSONData, function(k, v) {
+      //     var CHkey = translate(k);
+      //     this[CHkey] = v;
+      //     delete this[k];
+      // });
+      // function translate(k){
+      //   $.each(translation,function(uk,uv){
+      //     if(uv==k)
+      //     {
+      //       return uk;
+      //     }
+      //   });
+      //   return k
+      // }
+
       // var map = L.map('map').setView([37.8, -96], 4);
       var cities = new L.LayerGroup();
 
@@ -333,27 +386,44 @@
 
       function get_sentiNumber(area_name){
         var senti_number = -1;
-        $.each(target,function(uk,uv){
-            $.each(uv.map,function(hk,hv){
-                if(area_name==hv.location)
-                {
-                    senti_number=hv.score;
-                    return false
-                }
+        $.each(target[0].map.Taiwan,function(uk,uv){
+          if(uk==area_name)
+          {
+            $.each(uv,function(hk,hv){
+              senti_number += hv.score;
             });
-            if(senti_number!=-1)
-            {
-              return false
-            }
+            return false;
+          }
         });
-        return senti_number;
+        return senti_number+1;
       }
       $( "#submit_form" ).click(function() {
-          if($.trim( $('#add_issue').val() ) != '')
+          if($.trim( $('#issue').val() ) != '')
           {
               $( "#target" ).submit();
           }
       });
+      //this function is called in main.js
+      function ajaxCurrentDate()
+      {
+        var current_date = $('.selected').attr("data-date");
+        var split_month = current_date.split('/')
+        console.log(split_month[1]);
+        // $.ajax({                                      
+        //  url: '',                            
+        //  data: {issue:target[0].issue,current_date:current_date},                       
+                                        
+        //  dataType: 'json',               
+        //  success: function(data)          
+        //  {
+        //     target[0]=JSON.parse(data);
+        //     //redraw geojson
+        //     geojson.eachLayer(function (layer) {     
+        //         layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
+        //     });
+        //  } 
+        // });
+      }
 </script>
 <!-- <script async defer src="http://api.windyty.com/v2.1/boot.js"></script>  -->
 <!-- <script src="/static/Sentimap/js/boot.js"></script> -->
