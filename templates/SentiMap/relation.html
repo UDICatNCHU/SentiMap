@@ -1,0 +1,628 @@
+{% extends "entry/base.html"  %}
+{% load staticfiles %}
+
+{% block eachStyle %}
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+<link rel="stylesheet" href="{% static 'SentiMap/css/map.css' %}" />
+<style type="text/css">
+  #map1 {    height: 500px; width: 49%; 
+                margin-left: auto; margin-right: auto;
+                position: relative;
+                margin-top: 50px;
+                display: inline-block; }
+  #map2 {    height: 500px; width: 49%; 
+                margin-left: auto; margin-right: auto;
+                position: relative;
+                margin-top: 50px;
+                display: inline-block; }
+  #wrapper {
+      width: 75%;
+      margin: 0 auto;
+  }
+  
+</style>
+{% endblock %}
+
+{% block leftBar %}
+  {% include "SentiMap/extendEntry/leftBar.html" %}
+{% endblock %}
+
+{% block topBar %}
+  {% include "SentiMap/extendEntry/topBar.html" %}
+{% endblock %}
+
+
+{% block content %}
+<center>
+  <form id="target" action="/map/" method="get">
+      {% csrf_token %}
+      <!-- <input type="submit" value="傳送"> -->
+      <div class="ui big label">
+          添加議題 1:
+          <div class="ui icon input">
+            <input id="issue1" type="text" name="issue" placeholder="Search..." required>
+            <input type="hidden" name="month" value="00">
+          </div> 
+          添加議題 2:
+          <div class="ui icon input">
+            <input id="issue2" type="text" name="issue" placeholder="Search..." required>
+            <input type="hidden" name="month" value="00">
+          </div>
+          <i id="submit_form" class="inverted circular search link icon"></i>
+      </div>
+  </form>
+</center>
+<div id="wrapper">
+  <div id="map1"></div>
+  <div id="map2"></div>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js"></script>
+<!--MapName是從view傳過來的地圖名稱變數 with可以讓我們在template做變數的儲存 add可以串接字串-->
+<script src="
+{% with js_static='SentiMap/js/'|add:MapName %}
+  {% static js_static %}
+{% endwith %}
+" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
+<script>
+      var target=[];
+      var translation={
+        "台中市" : "",
+        "雲林縣" : "",
+        "彰化縣" : "",
+        "新竹縣" : "",
+        "苗栗縣" : "",
+        "南投縣" : "",
+        "嘉義縣" : "",
+        "屏東縣" : "",
+        "宜蘭縣" : "",
+        "花蓮縣" : "",
+        "台東縣" : "",
+        "金門縣" : "",
+        "澎湖縣" : "",
+        "新北市" : "",
+        "台北市" : "",
+        "新北市" : "",
+        "桃園縣" : "",
+        "台南市" : "",
+        "高雄市" : "",
+        "基隆市" : "",
+        "新竹市" : "",
+        "嘉義市" : ""
+      }
+      target[0]={
+       "map": {
+         "Taiwan": {
+           "Taiwan": {
+             "Fenjihu": {
+               "score": 0,
+               "attendee": 3
+             },
+             "Fen-chi-hu": {
+               "score": 0,
+               "attendee": 1
+             }
+           },
+           "台中市": {
+             "Zhongkeng Village": {
+               "score": 1000.0,
+               "attendee": 1
+             },
+             "Zhongkeng": {
+               "score": 10.0,
+               "attendee": 1
+             }
+           }
+         }
+       },
+       "issue": "光復節"
+      }
+
+      // switch EN key to CH key
+      // var parsed = JSON.parse(myJSONData, function(k, v) {
+      //     var CHkey = translate(k);
+      //     this[CHkey] = v;
+      //     delete this[k];
+      // });
+      // function translate(k){
+      //   $.each(translation,function(uk,uv){
+      //     if(uv==k)
+      //     {
+      //       return uk;
+      //     }
+      //   });
+      //   return k
+      // }
+
+      // var map = L.map('map').setView([37.8, -96], 4);
+      var cities = new L.LayerGroup();
+
+      L.marker([24.06, 120.40]).bindPopup('This is Littleton, CO.').addTo(cities),
+      L.marker([24.066, 120.45]).bindPopup('This is Denver, CO.').addTo(cities),
+      L.marker([24.07, 120.48]).bindPopup('This is Aurora, CO.').addTo(cities),
+      L.marker([24.075, 120.499]).bindPopup('This is Golden, CO.').addTo(cities);
+
+
+      var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+
+      var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+        streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+        comic  = L.tileLayer(mbUrl, {id: 'mapbox.comic',   attribution: mbAttr});
+        pencils  = L.tileLayer(mbUrl, {id: 'mapbox.pencils',   attribution: mbAttr});
+        outdoors  = L.tileLayer(mbUrl, {id: 'mapbox.outdoors',   attribution: mbAttr});
+        satellite  = L.tileLayer(mbUrl, {id: 'mapbox.satellite',   attribution: mbAttr});
+        run  = L.tileLayer(mbUrl, {id: 'mapbox.run-bike-hike',   attribution: mbAttr});
+
+      var map = L.map('map1', {
+          center: [24.06, 121.00],
+          zoom: 9,
+          // layers: [grayscale, cities]
+        });
+
+      var baseLayers = {
+        "Grayscale": grayscale,
+        "Streets": streets,
+        "comic": comic,
+        "pencils": pencils,
+        "outdoors": outdoors,
+        "satellite": satellite,
+        "run-bike-hike": run,
+      };
+
+      var overlays = {
+        "Cities": cities
+      };
+
+      // L.control.layers(baseLayers, overlays).addTo(map);
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+        maxZoom: 20,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        id: 'mapbox.light'
+      }).addTo(map);
+
+      function getColor(d) {
+        var senti_number=d;
+        if(!$.isNumeric(d))
+        {
+          senti_number=get_sentiNumber(d);
+        }
+        
+        return senti_number > 1000 ? '#0431B4' :
+         senti_number > 500  ? '#045FB4' :
+         senti_number > 200  ? '#0174DF' :
+         senti_number > 100  ? '#0000FF' :
+         senti_number > 50   ? '#2ECCFA' :
+         senti_number > 20   ? '#00BFFF' :
+         senti_number > 10   ? '#81F7F3' :
+                    '#58FAF4';
+         // d == "台中市" ? '#0000FF' :
+         //       d == "雲林縣"  ? '#0431B4' :
+         //       d == "彰化縣"  ? '#045FB4' :
+         //       d == "新竹縣" ? '#0174DF' :
+         //       d == "苗栗縣" ? '#00BFFF' :
+         //       d == "南投縣" ? '#2ECCFA' :
+         //       d == "嘉義縣" ? '#58FAF4' :
+         //       d == "屏東縣" ? '#81F7F3' :
+         //       d == "宜蘭縣" ? '#0000FF' :
+         //       d == "花蓮縣" ? '#2ECCFA' :
+         //       d == "台東縣" ? '#81F7F3' :
+         //       d == "金門縣" ? '#0174DF' :
+         //       d == "澎湖縣" ? '#81F7F3' :
+         //       d == "新北市" ? '#0000FF' :
+         //       d == "台北市" ?　'#0000FF' :
+         //       d == "新北市" ?　'#0431B4' :
+         //       d == "桃園縣" ?　'#81F7F3' :
+         //       d == "台南市" ?　'#58FAF4' :
+         //       d == "高雄市" ?　'#045FB4' :
+         //       d == "基隆市" ?　'#045FB4' :
+         //       d == "新竹市" ?　'#58FAF4' :
+         //       d == "嘉義市" ?　'#58FAF4' :
+              // d == "新北市第12選區" ?　'#A4A4A4' :
+              // d == "新北市第11選區" ?　'#6E6E6E' :
+              // d == "新北市第10選區" ?　'#A4A4A4' :
+              // d == "新北市第7選區" ?　'#D8D8D8' :
+              // d == "新北市第8選區" ?　'#D8D8D8' :
+              // d == "新北市第6選區" ?　'#D8D8D8' :
+              // d == "新北市第5選區" ?　'#6E6E6E' :
+              // d == "新北市第1選區" ?　'#424242' :
+              // d == "新北市第2選區" ?　'#D8D8D8' :
+              // d == "台北市第6選區" ?　'#FFFFFF' :
+              // d == "台北市第8選區" ?　'#A4A4A4' :
+              // d == "台北市第2選區" ?　'#2E2E2E' :
+              // d == "台北市第1選區" ?　'#2E2E2E' :
+              // d == "台北市第3選區" ?　'#6E6E6E' :
+              // d == "台北市第4選區" ?　'#2E2E2E' :
+              // d =="五股區" ?　'#F2F2F2' :
+              // d =="平溪區" ?　'#F2F2F2' :
+              // d =="永和區" ?　'#F2F2F2' :
+              // d =="汐止區" ?　'#F2F2F2' :
+              // d =="林口區" ?　'#424242' :
+              // d =="金山區" ?　'#F2F2F2':
+              // d =="泰山區" ?　'#424242' :
+              // d =="貢寮區" ?　'#F2F2F2' :
+              // d =="淡水區" ?　'#424242' :
+              // d =="新店區" ?　'#F2F2F2' :
+              // d =="新莊區" ?　'#424242' :
+              // d =="瑞芳區" ?　'#6E6E6E' :
+              // d =="樹林區" ?　'#F2F2F2' :
+              // d =="雙溪區" ?　'#6E6E6E' :
+              // d =="鶯歌區" ?　'#424242' :
+              // d =="中正區" ?  '#F2F2F2' :
+              // d =="中山區" ? '#424242'  :
+              // d =="松山區" ? '#6E6E6E'  :
+              // d =="大安區" ?  '#FAFAFA' :
+              // d =="萬華區" ?  '#FAFAFA' :
+              // d =="信義區" ? '#2E2E2E'  :
+              // d =="士林區" ?  '#F2F2F2' :
+              // d =="北投區" ? '#424242'  :
+              // d =="內湖區" ?  '#F2F2F2' :
+              // d =="南港區" ? '#424242'  :
+              // d =="文山區" ? '#6E6E6E'  :
+    }
+      function style(feature) {
+          return {
+              fillColor: getColor(feature.properties.name),
+              weight: 2,
+              opacity: 1,
+              color: 'white',
+              dashArray: '3',
+              fillOpacity: 0.7
+          };
+      }
+      function highlightFeature(e) {
+          var layer = e.target;
+
+          layer.setStyle({
+              weight: 5,
+              color: '#FA5858',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+          }
+          info.update(layer.feature.properties);
+      }
+      function resetHighlight(e) {
+          geojson.resetStyle(e.target);
+          info.update();
+      }
+      function zoomToFeature(e) {
+          map.fitBounds(e.target.getBounds());
+      }
+      function onEachFeature(feature, layer) {
+          layer.on({
+              mouseover: highlightFeature,
+              mouseout: resetHighlight,
+              click: zoomToFeature
+          });
+      }
+      var info = L.control();
+
+      info.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+          this.update();
+          return this._div;
+      };
+
+      // method that we will use to update the control based on feature properties passed
+      info.update = function (props) {
+          
+          this._div.innerHTML = '<h4>台灣地區 支持程度</h4>' +  (props ?
+              '<b>' + props.name + '</b><br />' + get_sentiNumber(props.name) + ' people / mi<sup>2</sup>'
+              : 'Hover over a state');
+      };
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function (map) {
+
+          var div = L.DomUtil.create('div', 'info legend'),
+              grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+              labels = [];
+
+          // loop through our density intervals and generate a label with a colored square for each interval
+          for (var i = 0; i < grades.length; i++) {
+              div.innerHTML +=
+                  '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                  grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+          }
+
+          return div;
+      };
+
+
+      geojson = L.geoJson(statesData, {
+          style: style,
+          onEachFeature: onEachFeature
+      }).addTo(map);
+      info.addTo(map);
+      legend.addTo(map);
+
+      function get_sentiNumber(area_name){
+        var senti_number = -1;
+        $.each(target[0].map.Taiwan,function(uk,uv){
+          if(uk==area_name)
+          {
+            $.each(uv,function(hk,hv){
+              senti_number += hv.score;
+            });
+            return false;
+          }
+        });
+        return senti_number+1;
+      }
+      $( "#submit_form" ).click(function() {
+          if($.trim( $('#issue').val() ) != '')
+          {
+              $( "#target" ).submit();
+          }
+      });
+</script>
+<script>
+      var target2=[];
+      target2[0]={
+       "map": {
+         "Taiwan": {
+           "Taiwan": {
+             "Fenjihu": {
+               "score": 0,
+               "attendee": 3
+             },
+             "Fen-chi-hu": {
+               "score": 0,
+               "attendee": 1
+             }
+           },
+           "台中市": {
+             "Zhongkeng Village": {
+               "score": 100.0,
+               "attendee": 1
+             },
+             "Zhongkeng": {
+               "score": 10.0,
+               "attendee": 1
+             }
+           }
+         }
+       },
+       "issue": "光復節"
+      }
+
+      // switch EN key to CH key
+      // var parsed = JSON.parse(myJSONData, function(k, v) {
+      //     var CHkey = translate(k);
+      //     this[CHkey] = v;
+      //     delete this[k];
+      // });
+      // function translate(k){
+      //   $.each(translation,function(uk,uv){
+      //     if(uv==k)
+      //     {
+      //       return uk;
+      //     }
+      //   });
+      //   return k
+      // }
+
+      var map2 = L.map('map2', {
+          center: [24.06, 121.00],
+          zoom: 9,
+          // layers: [grayscale, cities]
+        });
+
+      var baseLayers = {
+        "Grayscale": grayscale,
+        "Streets": streets,
+        "comic": comic,
+        "pencils": pencils,
+        "outdoors": outdoors,
+        "satellite": satellite,
+        "run-bike-hike": run,
+      };
+
+      var overlays = {
+        "Cities": cities
+      };
+
+      // L.control.layers(baseLayers, overlays).addTo(map);
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+        maxZoom: 20,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        id: 'mapbox.light'
+      }).addTo(map2);
+
+      function getColor2(d) {
+        var senti_number=d;
+        if(!$.isNumeric(d))
+        {
+          senti_number=get_sentiNumber2(d);
+        }
+        
+        return senti_number > 1000 ? '#0431B4' :
+         senti_number > 500  ? '#045FB4' :
+         senti_number > 200  ? '#0174DF' :
+         senti_number > 100  ? '#0000FF' :
+         senti_number > 50   ? '#2ECCFA' :
+         senti_number > 20   ? '#00BFFF' :
+         senti_number > 10   ? '#81F7F3' :
+                    '#58FAF4';
+         // d == "台中市" ? '#0000FF' :
+         //       d == "雲林縣"  ? '#0431B4' :
+         //       d == "彰化縣"  ? '#045FB4' :
+         //       d == "新竹縣" ? '#0174DF' :
+         //       d == "苗栗縣" ? '#00BFFF' :
+         //       d == "南投縣" ? '#2ECCFA' :
+         //       d == "嘉義縣" ? '#58FAF4' :
+         //       d == "屏東縣" ? '#81F7F3' :
+         //       d == "宜蘭縣" ? '#0000FF' :
+         //       d == "花蓮縣" ? '#2ECCFA' :
+         //       d == "台東縣" ? '#81F7F3' :
+         //       d == "金門縣" ? '#0174DF' :
+         //       d == "澎湖縣" ? '#81F7F3' :
+         //       d == "新北市" ? '#0000FF' :
+         //       d == "台北市" ?　'#0000FF' :
+         //       d == "新北市" ?　'#0431B4' :
+         //       d == "桃園縣" ?　'#81F7F3' :
+         //       d == "台南市" ?　'#58FAF4' :
+         //       d == "高雄市" ?　'#045FB4' :
+         //       d == "基隆市" ?　'#045FB4' :
+         //       d == "新竹市" ?　'#58FAF4' :
+         //       d == "嘉義市" ?　'#58FAF4' :
+              // d == "新北市第12選區" ?　'#A4A4A4' :
+              // d == "新北市第11選區" ?　'#6E6E6E' :
+              // d == "新北市第10選區" ?　'#A4A4A4' :
+              // d == "新北市第7選區" ?　'#D8D8D8' :
+              // d == "新北市第8選區" ?　'#D8D8D8' :
+              // d == "新北市第6選區" ?　'#D8D8D8' :
+              // d == "新北市第5選區" ?　'#6E6E6E' :
+              // d == "新北市第1選區" ?　'#424242' :
+              // d == "新北市第2選區" ?　'#D8D8D8' :
+              // d == "台北市第6選區" ?　'#FFFFFF' :
+              // d == "台北市第8選區" ?　'#A4A4A4' :
+              // d == "台北市第2選區" ?　'#2E2E2E' :
+              // d == "台北市第1選區" ?　'#2E2E2E' :
+              // d == "台北市第3選區" ?　'#6E6E6E' :
+              // d == "台北市第4選區" ?　'#2E2E2E' :
+              // d =="五股區" ?　'#F2F2F2' :
+              // d =="平溪區" ?　'#F2F2F2' :
+              // d =="永和區" ?　'#F2F2F2' :
+              // d =="汐止區" ?　'#F2F2F2' :
+              // d =="林口區" ?　'#424242' :
+              // d =="金山區" ?　'#F2F2F2':
+              // d =="泰山區" ?　'#424242' :
+              // d =="貢寮區" ?　'#F2F2F2' :
+              // d =="淡水區" ?　'#424242' :
+              // d =="新店區" ?　'#F2F2F2' :
+              // d =="新莊區" ?　'#424242' :
+              // d =="瑞芳區" ?　'#6E6E6E' :
+              // d =="樹林區" ?　'#F2F2F2' :
+              // d =="雙溪區" ?　'#6E6E6E' :
+              // d =="鶯歌區" ?　'#424242' :
+              // d =="中正區" ?  '#F2F2F2' :
+              // d =="中山區" ? '#424242'  :
+              // d =="松山區" ? '#6E6E6E'  :
+              // d =="大安區" ?  '#FAFAFA' :
+              // d =="萬華區" ?  '#FAFAFA' :
+              // d =="信義區" ? '#2E2E2E'  :
+              // d =="士林區" ?  '#F2F2F2' :
+              // d =="北投區" ? '#424242'  :
+              // d =="內湖區" ?  '#F2F2F2' :
+              // d =="南港區" ? '#424242'  :
+              // d =="文山區" ? '#6E6E6E'  :
+    }
+      function style2(feature) {
+          return {
+              fillColor: getColor2(feature.properties.name),
+              weight: 2,
+              opacity: 1,
+              color: 'white',
+              dashArray: '3',
+              fillOpacity: 0.7
+          };
+      }
+      function highlightFeature2(e) {
+          var layer = e.target;
+
+          layer.setStyle({
+              weight: 5,
+              color: '#FA5858',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+          }
+          info2.update(layer.feature.properties);
+      }
+      function resetHighlight2(e) {
+          geojson2.resetStyle(e.target);
+          info2.update();
+      }
+      function zoomToFeature2(e) {
+          map2.fitBounds(e.target.getBounds());
+      }
+      function onEachFeature2(feature, layer) {
+          layer.on({
+              mouseover: highlightFeature2,
+              mouseout: resetHighlight2,
+              click: zoomToFeature2
+          });
+      }
+      var info2 = L.control();
+
+      info2.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+          this.update();
+          return this._div;
+      };
+
+      // method that we will use to update the control based on feature properties passed
+      info2.update = function (props) {
+          
+          this._div.innerHTML = '<h4>台灣地區 支持程度</h4>' +  (props ?
+              '<b>' + props.name + '</b><br />' + get_sentiNumber2(props.name) + ' people / mi<sup>2</sup>'
+              : 'Hover over a state');
+      };
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function (map) {
+
+          var div = L.DomUtil.create('div', 'info legend'),
+              grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+              labels = [];
+
+          // loop through our density intervals and generate a label with a colored square for each interval
+          for (var i = 0; i < grades.length; i++) {
+              div.innerHTML +=
+                  '<i style="background:' + getColor2(grades[i] + 1) + '"></i> ' +
+                  grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+          }
+
+          return div;
+      };
+
+
+      geojson2 = L.geoJson(statesData, {
+          style: style2,
+          onEachFeature: onEachFeature2
+      }).addTo(map2);
+      info2.addTo(map2);
+      legend.addTo(map2);
+
+      function get_sentiNumber2(area_name){
+        var senti_number = -1;
+        $.each(target2[0].map.Taiwan,function(uk,uv){
+          if(uk==area_name)
+          {
+            $.each(uv,function(hk,hv){
+              senti_number += hv.score;
+            });
+            return false;
+          }
+        });
+        return senti_number+1;
+      }
+      $( "#submit_form" ).click(function() {
+          if($.trim( $('#issue1').val() ) != '' && $.trim( $('#issue2').val() ) != '')
+          {
+              $( "#target" ).submit();
+          }
+      });
+</script>
+<!-- <script async defer src="http://api.windyty.com/v2.1/boot.js"></script>  -->
+<!-- <script src="/static/Sentimap/js/boot.js"></script> -->
+{% endblock %}
