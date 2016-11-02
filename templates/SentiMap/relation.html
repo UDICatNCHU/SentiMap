@@ -21,7 +21,13 @@
       width: 75%;
       margin: 0 auto;
   }
-  
+  form{
+     width: 500px; 
+    margin-left: auto; margin-right: auto;
+    position: relative;
+    margin-top: 50px;
+    display: inline-block;
+  }
 </style>
 {% endblock %}
 
@@ -36,21 +42,26 @@
 
 {% block content %}
 <center>
-  <form id="target" action="/map/" method="get">
+  <form id="target" action="" method="get">
       {% csrf_token %}
       <!-- <input type="submit" value="傳送"> -->
       <div class="ui big label">
           添加議題 1:
           <div class="ui icon input">
             <input id="issue1" type="text" name="issue" placeholder="Search..." required>
-            <input type="hidden" name="month" value="00">
+            <i id="submit_form" class="inverted circular search link icon"></i>
           </div> 
+      </div>
+  </form>
+  <form id="target2" action="" method="get">
+      {% csrf_token %}
+      <!-- <input type="submit" value="傳送"> -->
+      <div class="ui big label">
           添加議題 2:
           <div class="ui icon input">
             <input id="issue2" type="text" name="issue" placeholder="Search..." required>
-            <input type="hidden" name="month" value="00">
-          </div>
-          <i id="submit_form" class="inverted circular search link icon"></i>
+            <i id="submit_form2" class="inverted circular search link icon"></i>
+          </div> 
       </div>
   </form>
 </center>
@@ -72,55 +83,55 @@
 <script>
       var target=[];
       var translation={
-        "台中市" : "",
-        "雲林縣" : "",
-        "彰化縣" : "",
-        "新竹縣" : "",
-        "苗栗縣" : "",
-        "南投縣" : "",
-        "嘉義縣" : "",
-        "屏東縣" : "",
-        "宜蘭縣" : "",
-        "花蓮縣" : "",
-        "台東縣" : "",
-        "金門縣" : "",
-        "澎湖縣" : "",
-        "新北市" : "",
-        "台北市" : "",
-        "新北市" : "",
-        "桃園縣" : "",
-        "台南市" : "",
-        "高雄市" : "",
-        "基隆市" : "",
-        "新竹市" : "",
-        "嘉義市" : ""
+         "Taichung City" : "台中市",
+         "Miaoli County" : "苗栗縣",
+         "Chiayi City" : "嘉義縣",
+         "Taipei" : "新北市",
+         "Taoyuan County" : "桃園縣",
+         "Kaohsiung" : "高雄市",
+         "Taipei City" : "台北市",
+         // "" : "台南市",
+         // "" : "南投縣",
+         // "" : "新北市",
+         // "" : "基隆市",
+         // "" : "新竹市",
+         // "" : "雲林縣",
+         // "" : "彰化縣",
+         // "" : "新竹縣",
+         // "" : "屏東縣",
+         // "" : "宜蘭縣",
+         // "" : "花蓮縣",
+         // "" : "台東縣",
+         // "" : "金門縣",
+         // "" : "澎湖縣",
+         // "" : "嘉義市"
       }
       target[0]={
-       "map": {
-         "Taiwan": {
-           "Taiwan": {
-             "Fenjihu": {
-               "score": 0,
-               "attendee": 3
-             },
-             "Fen-chi-hu": {
-               "score": 0,
-               "attendee": 1
-             }
-           },
-           "台中市": {
-             "Zhongkeng Village": {
-               "score": 1000.0,
-               "attendee": 1
-             },
-             "Zhongkeng": {
-               "score": 10.0,
-               "attendee": 1
-             }
-           }
-         }
-       },
-       "issue": "光復節"
+       // "map": {
+       //   "Taiwan": {
+       //     "Taiwan": {
+       //       "Fenjihu": {
+       //         "score": 0,
+       //         "attendee": 3
+       //       },
+       //       "Fen-chi-hu": {
+       //         "score": 0,
+       //         "attendee": 1
+       //       }
+       //     },
+       //     "台中市": {
+       //       "Zhongkeng Village": {
+       //         "score": 1000.0,
+       //         "attendee": 1
+       //       },
+       //       "Zhongkeng": {
+       //         "score": 10.0,
+       //         "attendee": 1
+       //       }
+       //     }
+       //   }
+       // },
+       // "issue": "光復節"
       }
 
       // switch EN key to CH key
@@ -372,31 +383,31 @@
 <script>
       var target2=[];
       target2[0]={
-       "map": {
-         "Taiwan": {
-           "Taiwan": {
-             "Fenjihu": {
-               "score": 0,
-               "attendee": 3
-             },
-             "Fen-chi-hu": {
-               "score": 0,
-               "attendee": 1
-             }
-           },
-           "台中市": {
-             "Zhongkeng Village": {
-               "score": 100.0,
-               "attendee": 1
-             },
-             "Zhongkeng": {
-               "score": 10.0,
-               "attendee": 1
-             }
-           }
-         }
-       },
-       "issue": "光復節"
+       // "map": {
+       //   "Taiwan": {
+       //     "Taiwan": {
+       //       "Fenjihu": {
+       //         "score": 0,
+       //         "attendee": 3
+       //       },
+       //       "Fen-chi-hu": {
+       //         "score": 0,
+       //         "attendee": 1
+       //       }
+       //     },
+       //     "台中市": {
+       //       "Zhongkeng Village": {
+       //         "score": 100.0,
+       //         "attendee": 1
+       //       },
+       //       "Zhongkeng": {
+       //         "score": 10.0,
+       //         "attendee": 1
+       //       }
+       //     }
+       //   }
+       // },
+       // "issue": "光復節"
       }
 
       // switch EN key to CH key
@@ -616,10 +627,27 @@
         });
         return senti_number+1;
       }
-      $( "#submit_form" ).click(function() {
-          if($.trim( $('#issue1').val() ) != '' && $.trim( $('#issue2').val() ) != '')
+      $( "#submit_form2" ).click(function() {
+          if($.trim( $('#issue2').val() ) != '')
           {
-              $( "#target" ).submit();
+              var issue = $('#issue2').val();
+              $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+                  $.each(data.map.Taiwan,function(uk,uv){
+                    
+                      var CHkey = translate(uk);
+                      if(CHkey!=uk)
+                      {
+                        data.map.Taiwan[CHkey] = uv;
+                        delete data.map.Taiwan[uk];
+                      }
+                  });
+                  console.log(data)
+                  target2[0]=data;
+                  //redraw geojson
+                  geojson2.eachLayer(function (layer) {     
+                      layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
+                  });
+              });
           }
       });
 </script>

@@ -7,9 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 <link rel="stylesheet" href="{% static 'SentiMap/css/map.css' %}" />
 
-<link rel="stylesheet" href="{% static 'Sentimap/timeline/reset.css' %}"> <!-- CSS reset -->
-<link rel="stylesheet" href="{% static 'Sentimap/timeline/style.css' %}"> <!-- Resource style -->
-<script src="{% static 'Sentimap/timeline/modernizr.js' %}"></script> <!-- Modernizr -->
+<link rel="stylesheet" href="{% static 'SentiMap/timeline/reset.css' %}"> <!-- CSS reset -->
+<link rel="stylesheet" href="{% static 'SentiMap/timeline/style.css' %}"> <!-- Resource style -->
+<script src="{% static 'SentiMap/timeline/modernizr.js' %}"></script> <!-- Modernizr -->
 <style type="text/css">
   #map {    height: 500px; width: 1000px; 
                 margin-left: auto; margin-right: auto;
@@ -102,60 +102,60 @@
 {% endwith %}
 " type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
-<script src="{% static 'Sentimap/timeline/jquery.mobile.custom.min.js' %}"></script>
-<script src="{% static 'Sentimap/timeline/main.js' %}"></script> <!-- Resource jQuery -->
+<script src="{% static 'SentiMap/timeline/jquery.mobile.custom.min.js' %}"></script>
+<script src="{% static 'SentiMap/timeline/main.js' %}"></script> <!-- Resource jQuery -->
 <script>
       var target=[];
       var translation={
-        "台中市" : "",
-        "雲林縣" : "",
-        "彰化縣" : "",
-        "新竹縣" : "",
-        "苗栗縣" : "",
-        "南投縣" : "",
-        "嘉義縣" : "",
-        "屏東縣" : "",
-        "宜蘭縣" : "",
-        "花蓮縣" : "",
-        "台東縣" : "",
-        "金門縣" : "",
-        "澎湖縣" : "",
-        "新北市" : "",
-        "台北市" : "",
-        "新北市" : "",
-        "桃園縣" : "",
-        "台南市" : "",
-        "高雄市" : "",
-        "基隆市" : "",
-        "新竹市" : "",
-        "嘉義市" : ""
+         "Taichung City" : "台中市",
+         "Miaoli County" : "苗栗縣",
+         "Chiayi City" : "嘉義縣",
+         "Taipei" : "新北市",
+         "Taoyuan County" : "桃園縣",
+         "Kaohsiung" : "高雄市",
+         "Taipei City" : "台北市",
+         // "" : "台南市",
+         // "" : "南投縣",
+         // "" : "新北市",
+         // "" : "基隆市",
+         // "" : "新竹市",
+         // "" : "雲林縣",
+         // "" : "彰化縣",
+         // "" : "新竹縣",
+         // "" : "屏東縣",
+         // "" : "宜蘭縣",
+         // "" : "花蓮縣",
+         // "" : "台東縣",
+         // "" : "金門縣",
+         // "" : "澎湖縣",
+         // "" : "嘉義市"
       }
       target[0]={
-       "map": {
-         "Taiwan": {
-           "Taiwan": {
-             "Fenjihu": {
-               "score": 0,
-               "attendee": 3
-             },
-             "Fen-chi-hu": {
-               "score": 0,
-               "attendee": 1
-             }
-           },
-           "台中市": {
-             "Zhongkeng Village": {
-               "score": 100.0,
-               "attendee": 1
-             },
-             "Zhongkeng": {
-               "score": 10.0,
-               "attendee": 1
-             }
-           }
-         }
-       },
-       "issue": "光復節"
+       // "map": {
+       //   "Taiwan": {
+       //     "Taiwan": {
+       //       "Fenjihu": {
+       //         "score": 0,
+       //         "attendee": 3
+       //       },
+       //       "Fen-chi-hu": {
+       //         "score": 0,
+       //         "attendee": 1
+       //       }
+       //     },
+       //     "台中市": {
+       //       "Zhongkeng Village": {
+       //         "score": 100.0,
+       //         "attendee": 1
+       //       },
+       //       "Zhongkeng": {
+       //         "score": 10.0,
+       //         "attendee": 1
+       //       }
+       //     }
+       //   }
+       // },
+       // "issue": "光復節"
       }
 
       // switch EN key to CH key
@@ -232,12 +232,12 @@
           senti_number=get_sentiNumber(d);
         }
         
-        return senti_number > 1000 ? '#0431B4' :
-         senti_number > 500  ? '#045FB4' :
-         senti_number > 200  ? '#0174DF' :
-         senti_number > 100  ? '#0000FF' :
-         senti_number > 50   ? '#2ECCFA' :
-         senti_number > 20   ? '#00BFFF' :
+        return senti_number > 500 ? '#0431B4' :
+         senti_number > 400  ? '#045FB4' :
+         senti_number > 300  ? '#0174DF' :
+         senti_number > 200  ? '#0000FF' :
+         senti_number > 100   ? '#2ECCFA' :
+         senti_number > 50   ? '#00BFFF' :
          senti_number > 10   ? '#81F7F3' :
                     '#58FAF4';
          // d == "台中市" ? '#0000FF' :
@@ -392,15 +392,44 @@
             $.each(uv,function(hk,hv){
               senti_number += hv.score;
             });
+          }
+        });
+        return senti_number*100;
+      }
+
+      function translate(k){
+        var rtn_val=k;
+        $.each(translation,function(uk,uv){
+
+          if(uk==k)
+          {
+            rtn_val=uv
             return false;
           }
         });
-        return senti_number+1;
+        return rtn_val;
       }
       $( "#submit_form" ).click(function() {
           if($.trim( $('#issue').val() ) != '')
           {
-              $( "#target" ).submit();
+              var issue = $('#issue').val();
+              $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+                  $.each(data.map.Taiwan,function(uk,uv){
+                    
+                      var CHkey = translate(uk);
+                      if(CHkey!=uk)
+                      {
+                        data.map.Taiwan[CHkey] = uv;
+                        delete data.map.Taiwan[uk];
+                      }
+                  });
+                  console.log(data)
+                  target[0]=data;
+                  //redraw geojson
+                  geojson.eachLayer(function (layer) {     
+                      layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
+                  });
+              });
           }
       });
       //this function is called in main.js
