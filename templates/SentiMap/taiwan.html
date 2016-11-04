@@ -11,10 +11,20 @@
 <link rel="stylesheet" href="{% static 'SentiMap/timeline/style.css' %}"> <!-- Resource style -->
 <script src="{% static 'SentiMap/timeline/modernizr.js' %}"></script> <!-- Modernizr -->
 <style type="text/css">
-  #map {    height: 500px; width: 1000px; 
+  #map1 {    height: 500px; width: 49%; 
                 margin-left: auto; margin-right: auto;
                 position: relative;
-                margin-top: 50px; }
+                margin-top: 50px;
+                display: inline-block; }
+  #map2 {    height: 500px; width: 49%; 
+                margin-left: auto; margin-right: auto;
+                position: relative;
+                margin-top: 50px;
+                display: inline-block; }
+  #wrapper {
+      width: 75%;
+      margin: 0 auto;
+  }
 </style>
 {% endblock %}
 
@@ -29,18 +39,13 @@
 
 {% block content %}
 <center>
-  <form id="target" action="" method="get">
-      {% csrf_token %}
-      <!-- <input type="submit" value="傳送"> -->
-      <div class="ui big label">
-          添加議題:
-          <div class="ui icon input">
-            <input id="issue" type="text" name="issue" placeholder="Search...">
-            <input type="hidden" name="month" value="00">
-            <i id="submit_form" class="inverted circular search link icon"></i>
-          </div>
+    <div class="ui big label">
+        添加議題:
+        <div class="ui icon input">
+          <input id="issue1" type="text" name="issue" placeholder="Search...">
+          <i id="submit_form" class="inverted circular search link icon"></i>
         </div>
-  </form>
+      </div>
 </center>
 <section class="cd-horizontal-timeline">
   <div class="timeline">
@@ -63,14 +68,14 @@
         </ol>
 
         <span class="filling-line" aria-hidden="true"></span>
-      </div> <!-- .events -->
-    </div> <!-- .events-wrapper -->
+      </div> 
+    </div> 
       
     <ul class="cd-timeline-navigation">
       <li><a href="#0" class="prev inactive">Prev</a></li>
       <li><a href="#0" class="next">Next</a></li>
-    </ul> <!-- .cd-timeline-navigation -->
-  </div> <!-- .timeline -->
+    </ul>
+  </div> 
 
   <div class="events-content">
     <ol>
@@ -88,9 +93,12 @@
       <li data-date="01/11/2014"></li>
       <li data-date="01/12/2014"></li>
     </ol>
-  </div> <!-- .events-content -->
+  </div>
 </section>
-<div id="map"></div>
+<div id="wrapper">
+  <div id="map1"></div>
+  <div id="map2"></div>
+</div>
 {% endblock %}
 
 {% block jsblock %}
@@ -106,6 +114,9 @@
 <script src="{% static 'SentiMap/timeline/main.js' %}"></script> <!-- Resource jQuery -->
 <script>
       var target=[];
+      var sort_key=[];
+      var sort_val=[];
+      var cnt=0;
       var translation={
          "Taichung City" : "台中市",
          "Miaoli County" : "苗栗縣",
@@ -187,7 +198,7 @@
         satellite  = L.tileLayer(mbUrl, {id: 'mapbox.satellite',   attribution: mbAttr});
         run  = L.tileLayer(mbUrl, {id: 'mapbox.run-bike-hike',   attribution: mbAttr});
 
-      var map = L.map('map', {
+      var map = L.map('map1', {
           center: [24.06, 121.00],
           zoom: 8,
           // layers: [grayscale, cities]
@@ -221,17 +232,26 @@
         if(!$.isNumeric(d))
         {
           senti_number=get_sentiNumber(d);
+          if(senti_number!=-100)
+          {
+            sort_key[cnt]=d;
+            sort_val[cnt]=senti_number;
+            cnt++
+          }
         }
         
-        return senti_number > 15 ? '#FF0000' :
-         senti_number > 10  ? '#FF4000' :
-         senti_number > 5  ? '#FFBF00' :
-         senti_number > 0  ? '#F3F781' :
-         senti_number > -5   ? '#58FAF4' :
-         senti_number > -10  ? '#00BFFF' :
-         senti_number > -15   ? '#0174DF' :
+        return senti_number == 1 ? '#FF0000' :
+         senti_number == 2  ? '#FF4000' :
+         senti_number == 3  ? '#FFBF00' :
+         senti_number == 4  ? '#FFFF00' :
+         senti_number == 5  ? '#F3F781' :
+         senti_number == 6   ? '#58FAF4' :
+         senti_number == 7   ? '#00BFFF' :
+         senti_number == 8  ? '#0174DF' :
+         senti_number == 9   ? '#0431B4' :
          senti_number == -100  ? '#A4A4A4' :
-                    '#0431B4';
+                    '#0000FF';
+        
          // d == "台中市" ? '#0000FF' :
          //       d == "雲林縣"  ? '#0431B4' :
          //       d == "彰化縣"  ? '#045FB4' :
@@ -298,7 +318,7 @@
     }
       function style(feature) {
           return {
-              fillColor: getColor(feature.properties.name),
+              fillColor: getColor_sort(feature.properties.name),
               weight: 2,
               opacity: 1,
               color: 'white',
@@ -346,8 +366,8 @@
       // method that we will use to update the control based on feature properties passed
       info.update = function (props) {
           
-          this._div.innerHTML = '<h4>台灣地區 支持程度</h4>' +  (props ?
-              '<b>' + props.name + '</b><br />' + get_sentiNumber(props.name) + ' people / mi<sup>2</sup>'
+          this._div.innerHTML = '<h4>台灣地區 正面評價</h4>' +  (props ?
+              '<b>' + props.name + '</b><br />' + (get_sentiNumber(props.name)) + '</sup>'
               : 'Hover over a state');
       };
       var legend = L.control({position: 'bottomright'});
@@ -355,14 +375,17 @@
       legend.onAdd = function (map) {
 
           var div = L.DomUtil.create('div', 'info legend'),
-              grades = [15,10,5,1,-5,-10,-15,-20],
+              grades = [1,2,3,4,5,6,7,8,9],
               labels = [];
 
           // loop through our density intervals and generate a label with a colored square for each interval
           for (var i = 0; i < grades.length; i++) {
               div.innerHTML +=
-                  '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                  grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                  '<i style="background:' + getColor(grades[i]) + '"></i> ' +grades[i]  ;
+              if(i!=9)
+              {
+                div.innerHTML+= '<br>';
+              }
           }
 
           return div;
@@ -378,12 +401,14 @@
 
       function get_sentiNumber(area_name){
         var senti_number = -100;
+        var attendee=0;
         var get_data=0;
         $.each(target[0].map.Taiwan,function(uk,uv){
           if(uk==area_name)
           {
             $.each(uv,function(hk,hv){
-              senti_number += hv.score;
+              senti_number += hv.positive;
+              attendee += hv.attendee;
               get_data=1;
             });
           }
@@ -391,24 +416,66 @@
         $.each(target[0].map.Taiwan.Taiwan,function(uk,uv){
           if(uk==area_name)
           {
-            senti_number += uv.score;
+            senti_number += uv.positive;
+            attendee += uv.attendee;
             get_data=1;
           }
         });
         $.each(target[0].map.Taiwan['Taiwan Province'],function(uk,uv){
           if(uk==area_name)
           {
-            senti_number += uv.score;
+            senti_number += uv.positive;
+            attendee += uv.attendee;
             get_data=1;
           }
         });
         if(get_data==1)
         {
           senti_number+=100
+          senti_number/=attendee;
         }
         return senti_number;
       }
-
+      function sortValue(){
+        var k;
+        for(i=0;i<sort_val.length;i++)
+        {
+          for(j=i;j<sort_val.length;j++)
+          {
+            if(sort_val[i]<sort_val[j])
+            {
+              k=sort_val[i]
+              sort_val[i]=sort_val[j]
+              sort_val[j]=k
+              k=sort_key[i]
+              sort_key[i]=sort_key[j]
+              sort_key[j]=k
+            }
+          }
+        }
+      }
+      function getColor_sort(d){
+        var senti_number=-100
+        for(i=0;i<sort_key.length;i++)
+        {
+          if(sort_key[i]==d)
+          {
+            senti_number=i+1
+            break;
+          }
+        }
+        return senti_number == 1 ? '#FF0000' :
+         senti_number == 2  ? '#FF4000' :
+         senti_number == 3  ? '#FFBF00' :
+         senti_number == 4  ? '#FFFF00' :
+         senti_number == 5  ? '#F3F781' :
+         senti_number == 6   ? '#58FAF4' :
+         senti_number == 7   ? '#00BFFF' :
+         senti_number == 8  ? '#0174DF' :
+         senti_number == 9   ? '#0431B4' :
+         senti_number == -100  ? '#A4A4A4' :
+                    '#0000FF';
+      }
       function translate(k){
         var rtn_val=k;
         $.each(translation,function(uk,uv){
@@ -421,10 +488,20 @@
         });
         return rtn_val;
       }
+      $('#issue1').keypress(function (e) {
+        code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13)
+        {
+            submit_form();
+        }
+      });
       $( "#submit_form" ).click(function() {
-          if($.trim( $('#issue').val() ) != '')
+          submit_form();
+      });
+      function submit_form(){
+        if($.trim( $('#issue1').val() ) != '')
           {
-              var issue = $('#issue').val();
+              var issue = $('#issue1').val();
               $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
                   $.each(data.map.Taiwan,function(uk,uv){
                     
@@ -456,32 +533,306 @@
                   console.log(data)
                   target[0]=data;
                   //redraw geojson
+                  cnt=0
                   geojson.eachLayer(function (layer) {     
                       layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
                   });
+                  sortValue();
+                  geojson.eachLayer(function (layer) {     
+                      layer.setStyle({fillColor :getColor_sort(layer.feature.properties.name)}) 
+                  });
+                  cnt=0;
+                  geojson2.eachLayer(function (layer) {     
+                      layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
+                  });
+                  sortValue2();
+                  geojson2.eachLayer(function (layer) {     
+                      layer.setStyle({fillColor :getColor_sort2(layer.feature.properties.name)}) 
+                  });
               });
           }
-      });
-      //this function is called in main.js
-      function ajaxCurrentDate()
-      {
-        var current_date = $('.selected').attr("data-date");
-        var split_month = current_date.split('/')
-        console.log(split_month[1]);
-        // $.ajax({                                      
-        //  url: '',                            
-        //  data: {issue:target[0].issue,current_date:current_date},                       
-                                        
-        //  dataType: 'json',               
-        //  success: function(data)          
-        //  {
-        //     target[0]=JSON.parse(data);
-        //     //redraw geojson
-        //     geojson.eachLayer(function (layer) {     
-        //         layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
-        //     });
-        //  } 
-        // });
+      }
+
+</script>
+<script>
+      var sort_key2=[];
+      var sort_val2=[];
+      var map2 = L.map('map2', {
+          center: [24.06, 121.00],
+          zoom: 8,
+          // layers: [grayscale, cities]
+        });
+
+      var baseLayers = {
+        "Grayscale": grayscale,
+        "Streets": streets,
+        "comic": comic,
+        "pencils": pencils,
+        "outdoors": outdoors,
+        "satellite": satellite,
+        "run-bike-hike": run,
+      };
+
+      var overlays = {
+        "Cities": cities
+      };
+
+      // L.control.layers(baseLayers, overlays).addTo(map);
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+        maxZoom: 20,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        id: 'mapbox.light'
+      }).addTo(map2);
+
+      function getColor2(d) {
+        var senti_number=d;
+        if(!$.isNumeric(d))
+        {
+          senti_number=get_sentiNumber2(d);
+          if(senti_number!=-100)
+          {
+            sort_key2[cnt]=d;
+            sort_val2[cnt]=senti_number;
+            cnt++
+          }
+        }
+        
+        return senti_number == 1 ? '#FF0000' :
+         senti_number == 2  ? '#FF4000' :
+         senti_number == 3  ? '#FFBF00' :
+         senti_number == 4  ? '#FFFF00' :
+         senti_number == 5  ? '#F3F781' :
+         senti_number == 6   ? '#58FAF4' :
+         senti_number == 7   ? '#00BFFF' :
+         senti_number == 8  ? '#0174DF' :
+         senti_number == 9   ? '#0431B4' :
+         senti_number == -100  ? '#A4A4A4' :
+                    '#0000FF';
+         // d == "台中市" ? '#0000FF' :
+         //       d == "雲林縣"  ? '#0431B4' :
+         //       d == "彰化縣"  ? '#045FB4' :
+         //       d == "新竹縣" ? '#0174DF' :
+         //       d == "苗栗縣" ? '#00BFFF' :
+         //       d == "南投縣" ? '#2ECCFA' :
+         //       d == "嘉義縣" ? '#58FAF4' :
+         //       d == "屏東縣" ? '#81F7F3' :
+         //       d == "宜蘭縣" ? '#0000FF' :
+         //       d == "花蓮縣" ? '#2ECCFA' :
+         //       d == "台東縣" ? '#81F7F3' :
+         //       d == "金門縣" ? '#0174DF' :
+         //       d == "澎湖縣" ? '#81F7F3' :
+         //       d == "新北市" ? '#0000FF' :
+         //       d == "台北市" ?　'#0000FF' :
+         //       d == "新北市" ?　'#0431B4' :
+         //       d == "桃園縣" ?　'#81F7F3' :
+         //       d == "台南市" ?　'#58FAF4' :
+         //       d == "高雄市" ?　'#045FB4' :
+         //       d == "基隆市" ?　'#045FB4' :
+         //       d == "新竹市" ?　'#58FAF4' :
+         //       d == "嘉義市" ?　'#58FAF4' :
+              // d == "新北市第12選區" ?　'#A4A4A4' :
+              // d == "新北市第11選區" ?　'#6E6E6E' :
+              // d == "新北市第10選區" ?　'#A4A4A4' :
+              // d == "新北市第7選區" ?　'#D8D8D8' :
+              // d == "新北市第8選區" ?　'#D8D8D8' :
+              // d == "新北市第6選區" ?　'#D8D8D8' :
+              // d == "新北市第5選區" ?　'#6E6E6E' :
+              // d == "新北市第1選區" ?　'#424242' :
+              // d == "新北市第2選區" ?　'#D8D8D8' :
+              // d == "台北市第6選區" ?　'#FFFFFF' :
+              // d == "台北市第8選區" ?　'#A4A4A4' :
+              // d == "台北市第2選區" ?　'#2E2E2E' :
+              // d == "台北市第1選區" ?　'#2E2E2E' :
+              // d == "台北市第3選區" ?　'#6E6E6E' :
+              // d == "台北市第4選區" ?　'#2E2E2E' :
+              // d =="五股區" ?　'#F2F2F2' :
+              // d =="平溪區" ?　'#F2F2F2' :
+              // d =="永和區" ?　'#F2F2F2' :
+              // d =="汐止區" ?　'#F2F2F2' :
+              // d =="林口區" ?　'#424242' :
+              // d =="金山區" ?　'#F2F2F2':
+              // d =="泰山區" ?　'#424242' :
+              // d =="貢寮區" ?　'#F2F2F2' :
+              // d =="淡水區" ?　'#424242' :
+              // d =="新店區" ?　'#F2F2F2' :
+              // d =="新莊區" ?　'#424242' :
+              // d =="瑞芳區" ?　'#6E6E6E' :
+              // d =="樹林區" ?　'#F2F2F2' :
+              // d =="雙溪區" ?　'#6E6E6E' :
+              // d =="鶯歌區" ?　'#424242' :
+              // d =="中正區" ?  '#F2F2F2' :
+              // d =="中山區" ? '#424242'  :
+              // d =="松山區" ? '#6E6E6E'  :
+              // d =="大安區" ?  '#FAFAFA' :
+              // d =="萬華區" ?  '#FAFAFA' :
+              // d =="信義區" ? '#2E2E2E'  :
+              // d =="士林區" ?  '#F2F2F2' :
+              // d =="北投區" ? '#424242'  :
+              // d =="內湖區" ?  '#F2F2F2' :
+              // d =="南港區" ? '#424242'  :
+              // d =="文山區" ? '#6E6E6E'  :
+    }
+      function style2(feature) {
+          return {
+              fillColor: getColor_sort2(feature.properties.name),
+              weight: 2,
+              opacity: 1,
+              color: 'white',
+              dashArray: '3',
+              fillOpacity: 0.7
+          };
+      }
+      function highlightFeature2(e) {
+          var layer = e.target;
+
+          layer.setStyle({
+              weight: 5,
+              color: '#FA5858',
+              dashArray: '',
+              fillOpacity: 0.7
+          });
+
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+          }
+          info2.update(layer.feature.properties);
+      }
+      function resetHighlight2(e) {
+          geojson2.resetStyle(e.target);
+          info2.update();
+      }
+      function zoomToFeature2(e) {
+          map2.fitBounds(e.target.getBounds());
+      }
+      function onEachFeature2(feature, layer) {
+          layer.on({
+              mouseover: highlightFeature2,
+              mouseout: resetHighlight2,
+              click: zoomToFeature2
+          });
+      }
+      var info2 = L.control();
+
+      info2.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+          this.update();
+          return this._div;
+      };
+
+      // method that we will use to update the control based on feature properties passed
+      info2.update = function (props) {
+          
+          this._div.innerHTML = '<h4>台灣地區 負面評價</h4>' +  (props ?
+              '<b>' + props.name + '</b><br />' + (get_sentiNumber2(props.name)) + ' </sup>'
+              : 'Hover over a state');
+      };
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function (map) {
+
+          var div = L.DomUtil.create('div', 'info legend'),
+              grades = [1,2,3,4,5,6,7,8,9],
+              labels = [];
+
+          // loop through our density intervals and generate a label with a colored square for each interval
+          for (var i = 0; i < grades.length; i++) {
+              div.innerHTML +=
+                  '<i style="background:' + getColor2(grades[i]) + '"></i> ' +grades[i]  ;
+              if(i!=9)
+              {
+                div.innerHTML+= '<br>';
+              }
+          }
+
+          return div;
+      };
+
+
+      geojson2 = L.geoJson(statesData, {
+          style: style2,
+          onEachFeature: onEachFeature2
+      }).addTo(map2);
+      info2.addTo(map2);
+      legend.addTo(map2);
+
+      function get_sentiNumber2(area_name){
+        var senti_number = -100;
+        var attendee=0;
+        var get_data=0;
+        $.each(target[0].map.Taiwan,function(uk,uv){
+          if(uk==area_name)
+          {
+            $.each(uv,function(hk,hv){
+              senti_number += hv.negative;
+              attendee += hv.attendee;
+              get_data=1;
+            });
+          }
+        });
+        $.each(target[0].map.Taiwan.Taiwan,function(uk,uv){
+          if(uk==area_name)
+          {
+            senti_number += uv.negative;
+            attendee += uv.attendee;
+            get_data=1;
+          }
+        });
+        $.each(target[0].map.Taiwan['Taiwan Province'],function(uk,uv){
+          if(uk==area_name)
+          {
+            senti_number += uv.negative;
+            attendee += uv.attendee;
+            get_data=1;
+          }
+        });
+        if(get_data==1)
+        {
+          senti_number+=100
+          senti_number/=attendee;
+        }
+        return senti_number;
+      }
+      function sortValue2(){
+        var k;
+        for(i=0;i<sort_val2.length;i++)
+        {
+          for(j=i;j<sort_val2.length;j++)
+          {
+            if(sort_val2[i]>sort_val2[j])
+            {
+              k=sort_val2[i]
+              sort_val2[i]=sort_val2[j]
+              sort_val2[j]=k
+              k=sort_key2[i]
+              sort_key2[i]=sort_key2[j]
+              sort_key2[j]=k
+            }
+          }
+        }
+      }
+      function getColor_sort2(d){
+        var senti_number=-100
+        for(i=0;i<sort_key2.length;i++)
+        {
+          if(sort_key2[i]==d)
+          {
+            senti_number=i+1
+            break;
+          }
+        }
+        return senti_number == 1 ? '#FF0000' :
+         senti_number == 2  ? '#FF4000' :
+         senti_number == 3  ? '#FFBF00' :
+         senti_number == 4  ? '#FFFF00' :
+         senti_number == 5  ? '#F3F781' :
+         senti_number == 6   ? '#58FAF4' :
+         senti_number == 7   ? '#00BFFF' :
+         senti_number == 8  ? '#0174DF' :
+         senti_number == 9   ? '#0431B4' :
+         senti_number == -100  ? '#A4A4A4' :
+                    '#0000FF';
       }
 </script>
 <!-- <script async defer src="http://api.windyty.com/v2.1/boot.js"></script>  -->
