@@ -194,18 +194,22 @@
       }).addTo(map);
 
       function getColor(d) {
-        var senti_number=d;
+        var senti_number=-100
         if(!$.isNumeric(d))
         {
-          senti_number=get_sentiNumber(d);
-          if(senti_number!=-100)
+          for(i=0;i<sort_key.length;i++)
           {
-            sort_key[cnt]=d;
-            sort_val[cnt]=senti_number;
-            cnt++
+            if(sort_key[i]==d)
+            {
+              senti_number=i+1
+              break;
+            }
           }
         }
-        
+        else
+        {
+          senti_number=d
+        }
         return senti_number == 1 ? '#FF0000' :
          senti_number == 2  ? '#FF4000' :
          senti_number == 3  ? '#FFBF00' :
@@ -283,7 +287,7 @@
     }
       function style(feature) {
           return {
-              fillColor: getColor_sort(feature.properties.name),
+              fillColor: getColor(feature.properties.name),
               weight: 2,
               opacity: 1,
               color: 'white',
@@ -434,28 +438,6 @@
           }
         }
       }
-      function getColor_sort(d){
-        var senti_number=-100
-        for(i=0;i<sort_key.length;i++)
-        {
-          if(sort_key[i]==d)
-          {
-            senti_number=i+1
-            break;
-          }
-        }
-        return senti_number == 1 ? '#FF0000' :
-         senti_number == 2  ? '#FF4000' :
-         senti_number == 3  ? '#FFBF00' :
-         senti_number == 4  ? '#FFFF00' :
-         senti_number == 5  ? '#F3F781' :
-         senti_number == 6   ? '#58FAF4' :
-         senti_number == 7   ? '#00BFFF' :
-         senti_number == 8  ? '#0174DF' :
-         senti_number == 9   ? '#0431B4' :
-         senti_number == -100  ? '#A4A4A4' :
-                    '#0000FF';
-      }
       $('#issue1').keypress(function (e) {
         code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13)
@@ -502,14 +484,21 @@
                   target[0]=data;
                   //redraw geojson
                   cnt=0
-                  geojson.eachLayer(function (layer) {     
-                      layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
+                  geojson.eachLayer(function (layer) {
+                      var area = layer.feature.properties.name;
+                      var sumOfScore = get_sentiNumber(area)
+                      if(sumOfScore!=-100)
+                      {
+                        sort_key[cnt]=area;
+                        sort_val[cnt]=sumOfScore;
+                        cnt++;
+                      }
                   });
                   sortValue();
                   geojson.eachLayer(function (layer) {     
-                      layer.setStyle({fillColor :getColor_sort(layer.feature.properties.name)}) 
+                      layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
                   });
-                  cnt=0
+                  cnt=0;
               });
           }
       }
@@ -581,18 +570,22 @@
       }).addTo(map2);
 
       function getColor2(d) {
-        var senti_number=d;
+        var senti_number=-100;
         if(!$.isNumeric(d))
         {
-          senti_number=get_sentiNumber2(d);
-          if(senti_number!=-100)
+          for(i=0;i<sort_key2.length;i++)
           {
-            sort_key2[cnt]=d;
-            sort_val2[cnt]=senti_number;
-            cnt++
+            if(sort_key2[i]==d)
+            {
+              senti_number=i+1
+              break;
+            }
           }
         }
-        
+        else
+        {
+          senti_number=d
+        }
         return senti_number == 1 ? '#FF0000' :
          senti_number == 2  ? '#FF4000' :
          senti_number == 3  ? '#FFBF00' :
@@ -670,7 +663,7 @@
     }
       function style2(feature) {
           return {
-              fillColor: getColor_sort2(feature.properties.name),
+              fillColor: getColor2(feature.properties.name),
               weight: 2,
               opacity: 1,
               color: 'white',
@@ -809,28 +802,6 @@
           }
         }
       }
-      function getColor_sort2(d){
-        var senti_number=-100
-        for(i=0;i<sort_key2.length;i++)
-        {
-          if(sort_key2[i]==d)
-          {
-            senti_number=i+1
-            break;
-          }
-        }
-        return senti_number == 1 ? '#FF0000' :
-         senti_number == 2  ? '#FF4000' :
-         senti_number == 3  ? '#FFBF00' :
-         senti_number == 4  ? '#FFFF00' :
-         senti_number == 5  ? '#F3F781' :
-         senti_number == 6   ? '#58FAF4' :
-         senti_number == 7   ? '#00BFFF' :
-         senti_number == 8  ? '#0174DF' :
-         senti_number == 9   ? '#0431B4' :
-         senti_number == -100  ? '#A4A4A4' :
-                    '#0000FF';
-      }
       $('#issue2').keypress(function (e) {
         code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13)
@@ -876,13 +847,20 @@
                   console.log(data)
                   target2[0]=data;
                   //redraw geojson
-                  cnt=0;
-                  geojson2.eachLayer(function (layer) {     
-                      layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
+                  cnt=0
+                  geojson2.eachLayer(function (layer) {
+                      var area = layer.feature.properties.name;
+                      var sumOfScore = get_sentiNumber2(area)
+                      if(sumOfScore!=-100)
+                      {
+                        sort_key2[cnt]=area;
+                        sort_val2[cnt]=sumOfScore;
+                        cnt++
+                      }
                   });
                   sortValue2();
                   geojson2.eachLayer(function (layer) {     
-                      layer.setStyle({fillColor :getColor_sort2(layer.feature.properties.name)}) 
+                      layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
                   });
               });
           }
