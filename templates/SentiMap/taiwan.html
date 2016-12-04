@@ -99,6 +99,7 @@
   <div id="map1"></div>
   <div id="map2"></div>
 </div>
+<canvas id="my_canvas" width="500" height="500"></canvas>
 {% endblock %}
 
 {% block jsblock %}
@@ -112,7 +113,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
 <script src="{% static 'SentiMap/timeline/jquery.mobile.custom.min.js' %}"></script>
 <script src="{% static 'SentiMap/timeline/main.js' %}"></script> <!-- Resource jQuery -->
+<script src="{% static 'SentiMap/js/wordcloud2.js' %}"></script> <!-- Modernizr -->
 <script>
+	
       var target=[];
       var sort_key=[];
       var sort_val=[];
@@ -555,6 +558,53 @@
                       layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
                   });
               });
+
+              $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/tfidf/?issue="+issue, function(data){
+
+                  var dic_list={}
+                  $.each(data.articleList,function(uk,uv){
+                      $.each(uv['tfidf'],function(mk,mv){
+                          if(!dic_list.hasOwnProperty(mk))
+                          {
+                            dic_list[mk]=0
+                          }
+                          dic_list[mk]+=1
+                      })
+                  });
+                  var max_ten=[["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0]]
+                  var min=0;
+                  var max=0;
+                  $.each(dic_list,function(uk,uv){
+                    if(!$.isNumeric(uk))
+                    {
+                      for(i=0;i<20;i++)
+                      {
+                        if(max_ten[i][1]<max_ten[min][1])
+                        {
+                            min=i
+                        }
+                      }
+                      if(max_ten[min][1]<uv)
+                      {
+                        max_ten.splice(min,1)
+                        var local_list=[]
+                        local_list[0]=uk
+                        local_list[1]=uv
+                        max_ten.push(local_list)
+                      }
+                    }
+                  });
+                  for(i=0;i<20;i++)
+                  {
+                    if(max_ten[i][1]>max_ten[max][1])
+                    {
+                        max=i
+                    }
+                  }
+                  console.log(max_ten)
+                  WordCloud($('#my_canvas')[0], { list:max_ten , gridSize: 10,weightFactor: 70/max_ten[max][1],fontFamily: 'Average, Times, serif',});
+
+              })
           }
       }
 
@@ -568,19 +618,19 @@
           // layers: [grayscale, cities]
         });
 
-      var baseLayers = {
-        "Grayscale": grayscale,
-        "Streets": streets,
-        "comic": comic,
-        "pencils": pencils,
-        "outdoors": outdoors,
-        "satellite": satellite,
-        "run-bike-hike": run,
-      };
+      // var baseLayers = {
+      //   "Grayscale": grayscale,
+      //   "Streets": streets,
+      //   "comic": comic,
+      //   "pencils": pencils,
+      //   "outdoors": outdoors,
+      //   "satellite": satellite,
+      //   "run-bike-hike": run,
+      // };
 
-      var overlays = {
-        "Cities": cities
-      };
+      // var overlays = {
+      //   "Cities": cities
+      // };
 
       // L.control.layers(baseLayers, overlays).addTo(map);
       L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
