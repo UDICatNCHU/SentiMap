@@ -53,18 +53,18 @@
       <div class="events">
         <ol>
           <li><a href="#0" data-date="00/00/0000" class="selected">All time</a></li>
-          <li><a href="#0" data-date="01/01/2014">Jan</a></li>
-          <li><a href="#0" data-date="01/02/2014">Feb</a></li>
-          <li><a href="#0" data-date="01/03/2014">Mar</a></li>
-          <li><a href="#0" data-date="01/04/2014">Apr</a></li>
-          <li><a href="#0" data-date="01/05/2014">May</a></li>
-          <li><a href="#0" data-date="01/06/2014">Jun</a></li>
-          <li><a href="#0" data-date="01/07/2014">Jul</a></li>
-          <li><a href="#0" data-date="01/08/2014">Aug</a></li>
-          <li><a href="#0" data-date="01/09/2014">Sep</a></li>
-          <li><a href="#0" data-date="01/10/2014">Oct</a></li>
-          <li><a href="#0" data-date="01/11/2014">Nov</a></li>
-          <li><a href="#0" data-date="01/12/2014">Dec</a></li>
+          <li><a href="#0" data-date="01/01/2005">Jan</a></li>
+          <li><a href="#0" data-date="01/01/2006">Feb</a></li>
+          <li><a href="#0" data-date="01/01/2007">Mar</a></li>
+          <li><a href="#0" data-date="01/01/2008">Apr</a></li>
+          <li><a href="#0" data-date="01/01/2009">May</a></li>
+          <li><a href="#0" data-date="01/01/2010">Jun</a></li>
+          <li><a href="#0" data-date="01/01/2011">Jul</a></li>
+          <li><a href="#0" data-date="01/01/2012">Aug</a></li>
+          <li><a href="#0" data-date="01/01/2013">Sep</a></li>
+          <li><a href="#0" data-date="01/01/2014">Oct</a></li>
+          <li><a href="#0" data-date="01/01/2015">Nov</a></li>
+          <li><a href="#0" data-date="01/01/2016">Dec</a></li>
         </ol>
 
         <span class="filling-line" aria-hidden="true"></span>
@@ -80,18 +80,18 @@
   <div class="events-content">
     <ol>
       <li data-date="00/00/0000" class="selected"></li>
-      <li data-date="01/01/2014"></li>
-      <li data-date="01/02/2014"></li>
-      <li data-date="01/03/2014"></li>
-      <li data-date="01/04/2014"></li>
-      <li data-date="01/05/2014"></li>
-      <li data-date="01/06/2014"></li>
-      <li data-date="01/07/2014"></li>
-      <li data-date="01/08/2014"></li>
-      <li data-date="01/09/2014"></li>
-      <li data-date="01/10/2014"></li>
+      <li data-date="01/01/2005"></li>
+      <li data-date="01/01/2006"></li>
+      <li data-date="01/01/2007"></li>
+      <li data-date="01/01/2008"></li>
+      <li data-date="01/01/2009"></li>
+      <li data-date="01/01/2010"></li>
+      <li data-date="01/01/2011"></li>
+      <li data-date="01/01/2012"></li>
+      <li data-date="01/01/2013"></li>
       <li data-date="01/11/2014"></li>
-      <li data-date="01/12/2014"></li>
+      <li data-date="01/11/2015"></li>
+      <li data-date="01/11/2016"></li>
     </ol>
   </div>
 </section>
@@ -121,29 +121,29 @@
       var sort_val=[];
       var cnt=0;
       var translation={
-         "Taichung City" : "台中市",
-         "Miaoli County" : "苗栗縣",
-         "Chiayi City" : "嘉義縣",
+         "Taichung" : "台中市",
+         "Miaoli" : "苗栗縣",
+         "Chiai" : "嘉義縣",
          "Taipei" : "新北市",
-         "Taoyuan County" : "桃園縣",
+         "Taoyüan" : "桃園縣",
          "Taoyuan City" : "桃園縣",
          "Taoyuan District" : "桃園縣",
          "Kaohsiung" : "高雄市",
          "Taipei City" : "台北市",
-         "Tainan City" : "台南市",
-         "Keelung City" : "基隆市",
-         // "" : "南投縣",
+         "Tainan" : "台南市",
+         "Keelung" : "基隆市",
+         "Nantou" : "南投縣",
          // "" : "新北市",
          // "" : "新竹市",
-         // "" : "雲林縣",
-         // "" : "彰化縣",
-         // "" : "新竹縣",
-         // "" : "屏東縣",
-         // "" : "宜蘭縣",
-         // "" : "花蓮縣",
-         // "" : "台東縣",
+         "Yünlin" : "雲林縣",
+         "Changhua" : "彰化縣",
+         "Hsinchu" : "新竹縣",
+         "Pingtung" : "屏東縣",
+         "Ilan" : "宜蘭縣",
+         "Hualien" : "花蓮縣",
+         "Taitung" : "台東縣",
          // "" : "金門縣",
-         // "" : "澎湖縣",
+         "Penghu" : "澎湖縣",
          // "" : "嘉義市"
       }
       target[0]={
@@ -503,24 +503,24 @@
           {
               var issue = $('#issue1').val();
               $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
-                  $.each(data.map.Taiwan,function(uk,uv){
+                  // $.each(data.map.Taiwan,function(uk,uv){
                     
-                      var CHkey = translate(uk);
-                      if(CHkey!=uk)
-                      {
-                        data.map.Taiwan[CHkey] = uv;
-                        delete data.map.Taiwan[uk];
-                      }
-                  });
-                  $.each(data.map.Taiwan.Taiwan,function(uk,uv){
+                  //     var CHkey = translate(uk);
+                  //     if(CHkey!=uk)
+                  //     {
+                  //       data.map.Taiwan[CHkey] = uv;
+                  //       delete data.map.Taiwan[uk];
+                  //     }
+                  // });
+                  // $.each(data.map.Taiwan.Taiwan,function(uk,uv){
                     
-                      var CHkey = translate(uk);
-                      if(CHkey!=uk)
-                      {
-                        data.map.Taiwan.Taiwan[CHkey] = uv;
-                        delete data.map.Taiwan[uk];
-                      }
-                  });
+                  //     var CHkey = translate(uk);
+                  //     if(CHkey!=uk)
+                  //     {
+                  //       data.map.Taiwan.Taiwan[CHkey] = uv;
+                  //       delete data.map.Taiwan[uk];
+                  //     }
+                  // });
                   $.each(data.map.Taiwan['Taiwan Province'],function(uk,uv){
                     
                       var CHkey = translate(uk);
