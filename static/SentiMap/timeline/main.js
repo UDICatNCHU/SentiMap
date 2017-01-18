@@ -300,7 +300,7 @@ jQuery(document).ready(function($){
 		var split_month = current_date[1].split('/')
 		console.log(split_month[1]);
 		console.log(split_month[2]);
-		if(/*year_selected_change != current_date[0]*/ split_month[1][0]=="00"  && issue != "")
+		if(/*year_selected_change != current_date[0]*/ split_month[1]=="00"  && issue != "")
 		{
 			
 			year_selected_change = current_date[0]
