@@ -442,6 +442,10 @@
         }
       }
       function translate(k){
+        if(k[0] == " ")
+        {
+          k = k.replace(" ","")
+        }
         var rtn_val=k;
         $.each(translation,function(uk,uv){
 
@@ -469,7 +473,6 @@
               var issue = $('#issue1').val();
               $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
                   $.each(data.map.Taiwan,function(uk,uv){
-                    
                       var CHkey = translate(uk);
                       if(CHkey!=uk)
                       {
