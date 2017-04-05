@@ -251,10 +251,11 @@
          "Pingtung" : "屏東縣",
          "Ilan" : "宜蘭縣",
          "Hualien" : "花蓮縣",
+         "Hualian" : "花蓮縣",
          "Taitung" : "台東縣",
          // "" : "金門縣",
          "Penghu" : "澎湖縣",
-         // "" : "嘉義市"
+         "Chiayi" : "嘉義市"
       }
       target[0]={}
       var map = L.map('map1', {
@@ -442,10 +443,6 @@
         }
       }
       function translate(k){
-        if(k[0] == " ")
-        {
-          k = k.replace(" ","")
-        }
         var rtn_val=k;
         $.each(translation,function(uk,uv){
 
@@ -471,12 +468,20 @@
         if($.trim( $('#issue1').val() ) != '')
           {
               var issue = $('#issue1').val();
-              $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+              $.getJSON( "http://140.120.13.243:9999/PTT_KCM_API/api/locations/?issue="+issue, function(data){
                   $.each(data.map.Taiwan,function(uk,uv){
                       var CHkey = translate(uk);
                       if(CHkey!=uk)
                       {
-                        data.map.Taiwan[CHkey] = uv;
+                        if("CHkey" in data.map.Taiwan)
+                        {
+                          data.map.Taiwan[CHkey] += uv;
+                        }
+                        else
+                        {
+                          data.map.Taiwan[CHkey] = uv;
+                        }
+                        
                         delete data.map.Taiwan[uk];
                       }
                   });
