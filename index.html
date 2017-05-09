@@ -234,6 +234,7 @@
          "Taichung" : "台中市",
          "Miaoli" : "苗栗縣",
          "Chiai" : "嘉義縣",
+         "Chiayi" : "嘉義縣",
          "Taipei" : "新北市",
          "Taoyüan" : "桃園縣",
          "Taoyuan City" : "桃園縣",
@@ -468,7 +469,7 @@
         if($.trim( $('#issue1').val() ) != '')
           {
               var issue = $('#issue1').val();
-              $.getJSON( "http://140.120.13.243:9999/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+              $.getJSON( "http://140.120.13.243:10001/PTT_KCM_API/api/locations/?issue="+issue, function(data){
                   $.each(data.map.Taiwan,function(uk,uv){
                       var CHkey = translate(uk);
                       if(CHkey!=uk)
