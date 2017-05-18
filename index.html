@@ -24,14 +24,12 @@
         height: 500px; width: 49%; 
         margin-left: auto; margin-right: auto;
         position: relative;
-        margin-top: 50px;
         display: inline-block;
     }
     #map2 {   
         height: 500px; width: 49%; 
         margin-left: auto; margin-right: auto;
         position: relative;
-        margin-top: 50px;
         display: inline-block; 
     }
     #wrapper {
@@ -60,9 +58,9 @@
   </center> 
   <center>
     <div id="change_timeline" class="ui buttons">
-      <button id="change_yearTimeline" class="ui positive button">年</button>
+      <button id="change_yearTimeline" class="ui button">年</button>
       <div class="or"></div>
-      <button id="change_monthTimeline" class="ui button">月</button>
+      <button id="change_monthTimeline" class="ui positive button">月</button>
     </div>
   </center>
   <!-- year timeline -->
@@ -71,7 +69,7 @@
       <div class="events-wrapper">
         <div class="events">
           <ol>
-            <li><a href="#0" data-date="00/00/1996" class="selected">1996</a></li>
+            <li><a href="#0" data-date="00/00/1996">1996</a></li>
             <li><a href="#0" data-date="00/00/1997">1997</a></li>
             <li><a href="#0" data-date="00/00/1998">1998</a></li>
             <li><a href="#0" data-date="00/00/1999">1999</a></li>
@@ -92,7 +90,7 @@
             <li><a href="#0" data-date="00/00/2014">2014</a></li>
             <li><a href="#0" data-date="00/00/2015">2015</a></li>
             <li><a href="#0" data-date="00/00/2016">2016</a></li>
-            <li><a href="#0" data-date="00/00/2017">2017</a></li>
+            <li><a href="#0" data-date="00/00/2017" class="selected">2017</a></li>
           </ol>
 
           <span class="filling-line" aria-hidden="true"></span>
@@ -107,7 +105,7 @@
 
     <div class="events-content">
       <ol>
-        <li data-date="00/00/1996" class="selected"></li>
+        <li data-date="00/00/1996"></li>
         <li data-date="00/00/1997"></li>
         <li data-date="00/00/1998"></li>
         <li data-date="00/00/1999"></li>
@@ -128,18 +126,17 @@
         <li data-date="00/00/2014"></li>
         <li data-date="00/00/2015"></li>
         <li data-date="00/00/2016"></li>
-        <li data-date="00/00/2017"></li>
+        <li data-date="00/00/2017" class="selected"></li>
       </ol>
     </div>
   </section>
   
   <!-- month timeline -->
-  <section id="month_timeline" class="cd-horizontal-timeline" hidden>
+  <section id="month_timeline" class="cd-horizontal-timeline">
     <div class="timeline">
       <div class="events-wrapper">
         <div class="events">
           <ol>
-            <li><a href="#0" data-date="00/00/0000" class="all_time selected">All time</a></li>
             <li><a href="#0" data-date="00/01/0000">Jan</a></li>
             <li><a href="#0" data-date="00/02/0000">Feb</a></li>
             <li><a href="#0" data-date="00/03/0000">Mar</a></li>
@@ -152,6 +149,7 @@
             <li><a href="#0" data-date="00/10/0000">Oct</a></li>
             <li><a href="#0" data-date="00/11/0000">Nov</a></li>
             <li><a href="#0" data-date="00/12/0000">Dec</a></li>
+            <li><a href="#0" data-date="00/00/0000" class="all_time selected">All time</a></li>
           </ol>
 
           <span class="filling-line" aria-hidden="true"></span>
@@ -166,7 +164,6 @@
 
     <div class="events-content">
       <ol>
-        <li data-date="00/00/0000" class="all_time selected"></li>
         <li data-date="00/01/0000"></li>
         <li data-date="00/02/0000"></li>
         <li data-date="00/03/0000"></li>
@@ -179,6 +176,7 @@
         <li data-date="00/10/0000"></li>
         <li data-date="00/11/0000"></li>
         <li data-date="00/12/0000"></li>
+        <li data-date="00/00/0000" class="all_time selected"></li>
       </ol>
     </div>
   </section>
@@ -225,7 +223,9 @@
   });
 </script>
 <script>
-  
+      $(window).bind("load", function() {
+         $("#year_timeline").attr("hidden","");
+      });
       var target=[];
       var sort_key=[];
       var sort_val=[];
