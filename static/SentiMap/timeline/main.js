@@ -305,7 +305,7 @@ jQuery(document).ready(function($){
 			
 			year_selected_change = current_date[0]
 			/*	年份的timeline	*/
-			$.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+			$.getJSON( "http://140.120.13.243:10001/PTT_KCM_API/api/locations/?issue="+issue, function(data){
 		    	redrawMap(data)
 		  	})
 		}
@@ -315,7 +315,7 @@ jQuery(document).ready(function($){
 			{
 				split_month[1]=split_month[1][1]
 			}
-			$.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/locations/?issue="+issue+"&date="+split_year[2]+"-"+split_month[1], function(data){
+			$.getJSON( "http://140.120.13.243:10001/PTT_KCM_API/api/locations/?issue="+issue+"&date="+split_year[2]+"-"+split_month[1], function(data){
 		    	redrawMap(data, issue)
 		  	})
 		}
@@ -325,8 +325,6 @@ jQuery(document).ready(function($){
 	{
 		sort_key=[];
 		sort_val=[];
-		sort_key2=[];
-		sort_val2=[];
 		if('Taiwan' in data.map)
 		{
 			 $.each(data.map.Taiwan,function(uk,uv){
@@ -349,21 +347,12 @@ jQuery(document).ready(function($){
 			     {
 			       sort_key[cnt]=area;
 			       sort_val[cnt]=sumOfScore_p;
-			     }
-			     var sumOfScore_n = get_sentiNumber2(area)
-			     if(sumOfScore_n!=-100)
-			     {
-			       sort_key2[cnt]=area;
-			       sort_val2[cnt]=sumOfScore_n;
 			       cnt++
 			     }
 			 });
 			 sortValue();
 			 geojson.eachLayer(function (layer) {     
 			     layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
-			 });
-			 geojson2.eachLayer(function (layer) {     
-			     layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
 			 });
 			//  $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/tfidf/?issue="+issue, function(data){
 
@@ -416,9 +405,6 @@ jQuery(document).ready(function($){
 		{
 			geojson.eachLayer(function (layer) {     
 			    layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
-			});
-			geojson2.eachLayer(function (layer) {     
-			    layer.setStyle({fillColor :getColor2(layer.feature.properties.name)}) 
 			});
 		}
 	}
