@@ -305,7 +305,12 @@ jQuery(document).ready(function($){
 			
 			year_selected_change = current_date[0]
 			/*	年份的timeline	*/
-			$.getJSON( "http://140.120.13.243:10001/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+			$.getJSON( "http://140.120.13.243:10003/PTT_KCM_API/api/locations/?issue="+issue, function(data){
+				if(Object.keys(data.map).length === 0)
+				{
+				  toastr.error('找不到此議題!');
+				  return false
+				}
 		    	redrawMap(data)
 		  	})
 		}
@@ -315,7 +320,12 @@ jQuery(document).ready(function($){
 			{
 				split_month[1]=split_month[1][1]
 			}
-			$.getJSON( "http://140.120.13.243:10001/PTT_KCM_API/api/locations/?issue="+issue+"&date="+split_year[2]+"-"+split_month[1], function(data){
+			$.getJSON( "http://140.120.13.243:10003/PTT_KCM_API/api/locations/?issue="+issue+"&date="+split_year[2]+"-"+split_month[1], function(data){
+		    	if(Object.keys(data.map).length === 0)
+		    	{
+		    	  toastr.error('找不到此議題!');
+		    	  return false
+		    	}
 		    	redrawMap(data, issue)
 		  	})
 		}
