@@ -275,7 +275,7 @@ jQuery(document).ready(function($){
 	}
 
 	var year_selected_change="00/00/1996";
-	//my function
+	// 讀取時間軸的年,月
 	function ajaxCurrentDate()
 	{
 		var issue = $('#issue1').val();
@@ -300,7 +300,8 @@ jQuery(document).ready(function($){
 		var split_month = current_date[1].split('/')
 		console.log(split_month[1]);
 		console.log(split_month[2]);
-		if(/*year_selected_change != current_date[0]*/ split_month[1]=="00"  && issue != "")
+		// split_month[1]=="00" 代表 all time
+		if(split_month[1]=="00"  && issue != "")
 		{
 			
 			year_selected_change = current_date[0]
@@ -316,6 +317,7 @@ jQuery(document).ready(function($){
 		}
 		else if( issue != "")
 		{
+			// 如果月份是01~09,只取個位數
 			if(split_month[1][0]=='0')
 			{
 				split_month[1]=split_month[1][1]
@@ -364,52 +366,6 @@ jQuery(document).ready(function($){
 			 geojson.eachLayer(function (layer) {     
 			     layer.setStyle({fillColor :getColor(layer.feature.properties.name)}) 
 			 });
-			//  $.getJSON( "http://140.120.13.243:8000/PTT_KCM_API/api/tfidf/?issue="+issue, function(data){
-
-			//      var dic_list={}
-			//      $.each(data.articleList,function(uk,uv){
-			//          $.each(uv['tfidf'],function(mk,mv){
-			//              if(!dic_list.hasOwnProperty(mk))
-			//              {
-			//                dic_list[mk]=0
-			//              }
-			//              dic_list[mk]+=1
-			//          })
-			//      });
-			//      var max_ten=[["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0]]
-			//      var min=0;
-			//      var max=0;
-			//      $.each(dic_list,function(uk,uv){
-			//        if(!$.isNumeric(uk))
-			//        {
-			//          for(i=0;i<20;i++)
-			//          {
-			//            if(max_ten[i][1]<max_ten[min][1])
-			//            {
-			//                min=i
-			//            }
-			//          }
-			//          if(max_ten[min][1]<uv)
-			//          {
-			//            max_ten.splice(min,1)
-			//            var local_list=[]
-			//            local_list[0]=uk
-			//            local_list[1]=uv
-			//            max_ten.push(local_list)
-			//          }
-			//        }
-			//      });
-			//      for(i=0;i<20;i++)
-			//      {
-			//        if(max_ten[i][1]>max_ten[max][1])
-			//        {
-			//            max=i
-			//        }
-			//      }
-			//      console.log(max_ten)
-			//      WordCloud($('#my_canvas')[0], { list:max_ten , gridSize: 10,weightFactor: 70/max_ten[max][1],fontFamily: 'Average, Times, serif',});
-			//  console.log("123")
-			// })
 		}
 		else
 		{
